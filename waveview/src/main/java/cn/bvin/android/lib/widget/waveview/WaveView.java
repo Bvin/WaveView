@@ -7,6 +7,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.LinearGradient;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Shader;
@@ -127,7 +128,17 @@ public class WaveView extends View {
 
         //bitmapCanvas.drawLine(mRadius/2, 0, mRadius/2, mTotalHeight, mWavePaint);
 
-        bitmapCanvas.drawRect(0, mRadius/2, mTotalWidth, mTotalHeight, mWavePaint);
+        //bitmapCanvas.drawRect(0, mRadius/2, mTotalWidth, mTotalHeight, mWavePaint);
+
+        Path path = new Path();
+        path.moveTo(0, getHeight());
+        resetPositonY();
+        for (int i = 0; i < getWidth(); i++) {
+            path.lineTo(i, mResetOneYPositions[i]+mRadius);
+        }
+        path.lineTo(getWidth(), getHeight());
+        path.close();
+        bitmapCanvas.drawPath(path, mWavePaint);
 
         // 改变两条波纹的移动点
         mXOneOffset += mXOffsetSpeedOne;
