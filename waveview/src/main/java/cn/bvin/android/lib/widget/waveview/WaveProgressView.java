@@ -7,10 +7,10 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.LinearGradient;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Shader;
-import android.graphics.SweepGradient;
 import android.os.Build;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
@@ -18,11 +18,24 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 
+import java.text.DecimalFormat;
+
 /**
  * Created by bvin on 2017/7/12.
  */
 
-public class WaveView extends View {
+public class WaveProgressView extends View {
+
+
+    public WaveProgressView(Context context) {
+        super(context);
+    }
+
+    public WaveProgressView(Context context, @Nullable AttributeSet attrs) {
+        super(context, attrs);
+        attrs(context, attrs);
+        init();
+    }
 
     private float mRadius;
     private Paint mRingPaint;
@@ -54,19 +67,23 @@ public class WaveView extends View {
 
     private Bitmap mBitmap;
 
+
+    private int radius = dp2px(55);
+    private int textColor;
+    private int textSize;
+    private int progressColor;
+    private int radiusColor;
+    private Paint textPaint;
+    private Paint circlePaint;
+    private Paint pathPaint;
     private Bitmap bitmap;
     private Canvas bitmapCanvas;
-
-    public WaveView(Context context) {
-        super(context);
-        init();
-    }
-
-    public WaveView(Context context, @Nullable AttributeSet attrs) {
-        super(context, attrs);
-        attrs(context, attrs);
-        init();
-    }
+    private int width, height;
+    private int minPadding;
+    private float progress;
+    private float maxProgress;
+    private Path path = new Path();
+    private DecimalFormat df = new DecimalFormat("0.0");
 
     private void attrs(Context context, @Nullable AttributeSet attrs){
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.WaveView);
@@ -77,7 +94,7 @@ public class WaveView extends View {
 
     private void init(){
         mRingPaint = new Paint();
-        Shader shader = new LinearGradient(mRadius,mRadius*2,mRadius,0,Color.parseColor("#FF8362"), Color.parseColor("#FF4258"), Shader.TileMode.CLAMP);
+        Shader shader = new LinearGradient(mRadius,mRadius*2,mRadius,0, Color.parseColor("#FF8362"), Color.parseColor("#FF4258"), Shader.TileMode.CLAMP);
         //mRingPaint.setShader(shader);
         mRingPaint.setColor(Color.BLUE);
         mRingPaint.setAntiAlias(true);
@@ -94,8 +111,7 @@ public class WaveView extends View {
         mXOffsetSpeedOne = TRANSLATE_X_SPEED_ONE;
         mXOffsetSpeedTwo = TRANSLATE_X_SPEED_TWO;
 
-        mPorterDuffXfermode = new PorterDuffXfermode(PorterDuff.Mode.SRC_IN);
-        mWavePaint.setXfermode(mPorterDuffXfermode);
+        mPorterDuffXfermode = new PorterDuffXfermode(PorterDuff.Mode.DST_OUT);
     }
 
     @Override
@@ -112,91 +128,55 @@ public class WaveView extends View {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        //draw1(canvas);
-        draw2(canvas);
-    }
-
-    private void draw2(Canvas canvas){
         if (bitmap == null) {
-            bitmap = Bitmap.createBitmap(getWidth(), getHeight(), Bitmap.Config.ARGB_8888);
+            bitmap = Bitmap.createBitmap(this.width, this.height, Bitmap.Config.ARGB_8888);
             bitmapCanvas = new Canvas(bitmap);
         }
         bitmapCanvas.save();
+        //移动坐标系
+        bitmapCanvas.translate(minPadding, minPadding);
         //绘制圆
-        bitmapCanvas.drawCircle(mRadius, mRadius, mRadius, mRingPaint);
+        bitmapCanvas.drawCircle(radius, radius, radius, circlePaint);
 
-        //bitmapCanvas.drawLine(mRadius/2, 0, mRadius/2, mTotalHeight, mWavePaint);
-
-        bitmapCanvas.drawRect(0, mRadius/2, mTotalWidth, mTotalHeight, mWavePaint);
-
-        // 改变两条波纹的移动点
-        mXOneOffset += mXOffsetSpeedOne;
-        mXTwoOffset += mXOffsetSpeedTwo;
-
-        // 如果已经移动到结尾处，则重头记录
-        if (mXOneOffset >= mTotalWidth) {
-            mXOneOffset = 0;
+        //绘制PATH
+        //重置绘制路线
+        path.reset();
+        float percent=progress * 1.0f / maxProgress;
+        float y = (1 - percent) * radius * 2;
+        //移动到右上边
+        path.moveTo(radius * 2, y);
+        //移动到最右下方
+        path.lineTo(radius * 2, radius * 2);
+        //移动到最左下边
+        path.lineTo(0, radius * 2);
+        //移动到左上边
+        // path.lineTo(0, y);
+        //实现左右波动,根据progress来平移
+        path.lineTo(-(1 -percent) * radius*2, y);
+        if (progress != 0.0f) {
+            //根据直径计算绘制贝赛尔曲线的次数
+            int count = radius * 4 / 60;
+            //控制-控制点y的坐标
+            float point = (1 - percent) * 15;
+            for (int i = 0; i < count; i++) {
+                path.rQuadTo(15, -point, 30, 0);
+                path.rQuadTo(15, point, 30, 0);
+            }
         }
-        if (mXTwoOffset > mTotalWidth) {
-            mXTwoOffset = 0;
-        }
+        //闭合
+        path.close();
+        bitmapCanvas.drawPath(path, pathPaint);
+
+        //绘制文字
+        String text = progress + "%";
+        float textW = textPaint.measureText(text);
+        Paint.FontMetrics fontMetrics = textPaint.getFontMetrics();
+        float baseLine = radius - (fontMetrics.ascent + fontMetrics.descent) / 2;
+        bitmapCanvas.drawText(text, radius - textW / 2, baseLine, textPaint);
 
         bitmapCanvas.restore();
 
         canvas.drawBitmap(bitmap, 0, 0, null);
-    }
-
-    private void draw1(Canvas canvas) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-            setLayerType(LAYER_TYPE_HARDWARE, null);
-        }
-
-        canvas.drawColor(Color.TRANSPARENT);
-
-        canvas.drawCircle(mRadius, mRadius, mRadius - mStrockWidth, mRingPaint);
-
-        resetPositonY();
-        for (int i = 0; i < mTotalWidth; i++) {
-
-            // 减400只是为了控制波纹绘制的y的在屏幕的位置，大家可以改成一个变量，然后动态改变这个变量，从而形成波纹上升下降效果
-            // 绘制第一条水波纹
-            /*canvas.drawLine(i, mTotalHeight - mResetOneYPositions[i] - 400, i,
-                    mTotalHeight,
-                    mWavePaint);*/
-
-            //mWavePaint.setXfermode(mPorterDuffXfermode);
-
-            // 绘制第二条水波纹
-            /*canvas.drawLine(i, mTotalHeight - mResetTwoYPositions[i] - 400, i,
-                    mTotalHeight,
-                    mWavePaint);*/
-        }
-
-        // 改变两条波纹的移动点
-        mXOneOffset += mXOffsetSpeedOne;
-        mXTwoOffset += mXOffsetSpeedTwo;
-
-        // 如果已经移动到结尾处，则重头记录
-        if (mXOneOffset >= mTotalWidth) {
-            mXOneOffset = 0;
-        }
-        if (mXTwoOffset > mTotalWidth) {
-            mXTwoOffset = 0;
-        }
-
-        if (bitmap == null) {
-            bitmap = Bitmap.createBitmap(getWidth(), getHeight(), Bitmap.Config.ARGB_8888);
-            bitmapCanvas = new Canvas(bitmap);
-        }
-        bitmapCanvas.save();
-        // 引发view重绘，一般可以考虑延迟20-30ms重绘，空出时间片
-        //postInvalidate();
-        mWavePaint.setXfermode(mPorterDuffXfermode);
-        bitmapCanvas.drawRect(0,190,getWidth(),getBottom(),mWavePaint);
-
-        canvas.drawBitmap(bitmap, 0, 0, null);
-        mWavePaint.setXfermode(null);
-        bitmapCanvas.restore();
     }
 
     @Override
@@ -232,5 +212,9 @@ public class WaveView extends View {
         System.arraycopy(mYPositions, mXTwoOffset, mResetTwoYPositions, 0,
                 yTwoInterval);
         System.arraycopy(mYPositions, 0, mResetTwoYPositions, yTwoInterval, mXTwoOffset);
+    }
+
+    private int dp2px(int dp) {
+        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, getResources().getDisplayMetrics());
     }
 }
