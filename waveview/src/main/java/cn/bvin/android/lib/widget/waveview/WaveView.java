@@ -38,7 +38,7 @@ public class WaveView extends View {
     private static final float STRETCH_FACTOR_A = 20;
     private static final int OFFSET_Y = 0;
     // 第一条水波移动速度
-    private static final int TRANSLATE_X_SPEED_ONE = 7;
+    private static final int TRANSLATE_X_SPEED_ONE = 9;
     // 第二条水波移动速度
     private static final int TRANSLATE_X_SPEED_TWO = 5;
     private float mCycleFactorW;
@@ -101,8 +101,8 @@ public class WaveView extends View {
         mWavePaint2.setStyle(Paint.Style.FILL);
         mWavePaint2.setShader(shader);
 
-        mXOffsetSpeedOne = TRANSLATE_X_SPEED_ONE;
-        mXOffsetSpeedTwo = TRANSLATE_X_SPEED_TWO;
+        mXOffsetSpeedOne = TRANSLATE_X_SPEED_ONE*5;
+        mXOffsetSpeedTwo = TRANSLATE_X_SPEED_TWO*5;
 
         mPorterDuffXfermode = new PorterDuffXfermode(PorterDuff.Mode.SRC_IN);
         mWavePaintTransparent.setXfermode(mPorterDuffXfermode);
