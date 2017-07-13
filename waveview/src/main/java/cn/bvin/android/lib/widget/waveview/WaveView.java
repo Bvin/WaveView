@@ -3,6 +3,7 @@ package cn.bvin.android.lib.widget.waveview;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.LinearGradient;
@@ -10,13 +11,12 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
+import android.graphics.Rect;
 import android.graphics.Shader;
-import android.graphics.SweepGradient;
 import android.os.Build;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.util.TypedValue;
 import android.view.View;
 
 /**
@@ -29,7 +29,7 @@ public class WaveView extends View {
     private Paint mRingPaint;
     private float mStrockWidth;
 
-    private Paint mWavePaint;
+    private Paint mWavePaintTransparent;
     private Paint mWavePaint2;
 
     // 波纹颜色
@@ -58,6 +58,7 @@ public class WaveView extends View {
 
     private Bitmap bitmap;
     private Canvas bitmapCanvas;
+    private float mMaxPosition;
 
     public WaveView(Context context) {
         super(context);
@@ -82,17 +83,18 @@ public class WaveView extends View {
         Shader shader = new LinearGradient(mRadius,mRadius*2,mRadius,0,Color.parseColor("#FF8362"), Color.parseColor("#FF4258"), Shader.TileMode.CLAMP);
         Shader shader2 = new LinearGradient(mRadius,mRadius*2,mRadius,0,Color.parseColor("#88FF8362"), Color.parseColor("#88FF4258"), Shader.TileMode.CLAMP);
         //mRingPaint.setShader(shader);
-        mRingPaint.setColor(Color.BLUE);
+        mRingPaint.setColor(Color.parseColor("#55ffffff"));
         mRingPaint.setAntiAlias(true);
         mRingPaint.setStyle(Paint.Style.FILL);
         mStrockWidth = 3;
         mRingPaint.setStrokeWidth(mStrockWidth);
 
 
-        mWavePaint = new Paint();
-        mWavePaint.setAntiAlias(true);
-        mWavePaint.setStyle(Paint.Style.FILL);
-        mWavePaint.setShader(shader2);
+        mWavePaintTransparent = new Paint();
+        mWavePaintTransparent.setAntiAlias(true);
+        mWavePaintTransparent.setStyle(Paint.Style.FILL);
+        mWavePaintTransparent.setShader(shader);
+        mWavePaintTransparent.setAlpha(128);
 
         mWavePaint2 = new Paint();
         mWavePaint2.setAntiAlias(true);
@@ -103,7 +105,7 @@ public class WaveView extends View {
         mXOffsetSpeedTwo = TRANSLATE_X_SPEED_TWO;
 
         mPorterDuffXfermode = new PorterDuffXfermode(PorterDuff.Mode.SRC_IN);
-        mWavePaint.setXfermode(mPorterDuffXfermode);
+        mWavePaintTransparent.setXfermode(mPorterDuffXfermode);
     }
 
     @Override
@@ -125,20 +127,27 @@ public class WaveView extends View {
     }
 
     private void draw2(Canvas canvas){
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+            setLayerType(LAYER_TYPE_HARDWARE, null);
+        }
+
         if (bitmap == null) {
             bitmap = Bitmap.createBitmap(getWidth(), getHeight(), Bitmap.Config.ARGB_8888);
             bitmapCanvas = new Canvas(bitmap);
         }
         bitmapCanvas.save();
         //绘制圆
-        bitmapCanvas.drawCircle(mRadius, mRadius, mRadius, mRingPaint);
+        //bitmapCanvas.drawCircle(mRadius, mRadius, mRadius, mRingPaint);
 
-        //bitmapCanvas.drawLine(mRadius/2, 0, mRadius/2, mTotalHeight, mWavePaint);
+        drawBitmapInCenter(bitmapCanvas,getCircleInRect());
 
-        //bitmapCanvas.drawRect(0, mRadius/2, mTotalWidth, mTotalHeight, mWavePaint);
+        //bitmapCanvas.drawLine(mRadius/2, 0, mRadius/2, mTotalHeight, mWavePaintTransparent);
+
+        //bitmapCanvas.drawRect(0, mRadius/2, mTotalWidth, mTotalHeight, mWavePaintTransparent);
 
         Path path1 = new Path();
-        path1.moveTo(0, getHeight());
+        path1.moveTo(0, mMaxPosition+mRadius);
 
         Path path2 = new Path();
         path2.moveTo(0, getHeight());
@@ -148,10 +157,10 @@ public class WaveView extends View {
             path1.lineTo(i, mResetOneYPositions[i]+mRadius);
             path2.lineTo(i, mResetTwoYPositions[i]+mRadius);
         }
-        path1.lineTo(getWidth(), getHeight());
+        path1.lineTo(getWidth(), mMaxPosition+mRadius);
         path1.close();
-        mWavePaint.setXfermode(mPorterDuffXfermode);
-        bitmapCanvas.drawPath(path1, mWavePaint);
+       // mWavePaintTransparent.setXfermode(mPorterDuffXfermode);
+        bitmapCanvas.drawPath(path1, mWavePaintTransparent);
 
         path2.lineTo(getWidth(), getHeight());
         path2.close();
@@ -173,9 +182,27 @@ public class WaveView extends View {
         bitmapCanvas.restore();
 
         canvas.drawBitmap(bitmap, 0, 0, null);
-        mWavePaint.setXfermode(null);
+        mWavePaintTransparent.setXfermode(null);
         mWavePaint2.setXfermode(null);
         postInvalidate();
+    }
+
+    private void drawBitmapInCenter(Canvas canvas,Bitmap bitmap){
+        Bitmap emptyBitmap =Bitmap.createBitmap(getWidth(),getHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvasOfBitmap = new Canvas(emptyBitmap);
+        Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        paint.setColor(Color.BLUE);
+        paint.setStyle(Paint.Style.FILL);
+        canvasOfBitmap.drawCircle(mRadius, mRadius, mRadius, paint);
+        Rect rectSrc = new Rect(bitmap.getWidth()*1/4, bitmap.getHeight()*1/4, bitmap.getWidth()*3/4, bitmap.getHeight()*3/4);
+        Rect rect = new Rect(0, 0, getWidth(), getHeight());
+        paint.setXfermode(mPorterDuffXfermode);
+        canvasOfBitmap.drawBitmap(bitmap, rectSrc, rect, paint);
+        canvas.drawBitmap(emptyBitmap, 0, 0, null);
+    }
+
+    private Bitmap getCircleInRect(){
+        return BitmapFactory.decodeResource(getResources(),R.drawable.pp);
     }
 
     private void draw1(Canvas canvas) {
@@ -194,14 +221,14 @@ public class WaveView extends View {
             // 绘制第一条水波纹
             /*canvas.drawLine(i, mTotalHeight - mResetOneYPositions[i] - 400, i,
                     mTotalHeight,
-                    mWavePaint);*/
+                    mWavePaintTransparent);*/
 
-            //mWavePaint.setXfermode(mPorterDuffXfermode);
+            //mWavePaintTransparent.setXfermode(mPorterDuffXfermode);
 
             // 绘制第二条水波纹
             /*canvas.drawLine(i, mTotalHeight - mResetTwoYPositions[i] - 400, i,
                     mTotalHeight,
-                    mWavePaint);*/
+                    mWavePaintTransparent);*/
         }
 
         // 改变两条波纹的移动点
@@ -223,11 +250,12 @@ public class WaveView extends View {
         bitmapCanvas.save();
         // 引发view重绘，一般可以考虑延迟20-30ms重绘，空出时间片
         //postInvalidate();
-        mWavePaint.setXfermode(mPorterDuffXfermode);
-        bitmapCanvas.drawRect(0,190,getWidth(),getBottom(),mWavePaint);
+        mWavePaintTransparent.setXfermode(mPorterDuffXfermode);
+        bitmapCanvas.drawRect(0,190,getWidth(),getBottom(), mWavePaintTransparent);
 
         canvas.drawBitmap(bitmap, 0, 0, null);
-        mWavePaint.setXfermode(null);
+        mWavePaintTransparent.setXfermode(null);
+
         bitmapCanvas.restore();
     }
 
@@ -247,9 +275,14 @@ public class WaveView extends View {
         // 将周期定为view总宽度
         mCycleFactorW = (float) (2 * Math.PI / mTotalWidth);
 
+        mMaxPosition = Float.MIN_VALUE;
+
         // 根据view总宽度得出所有对应的y值
         for (int i = 0; i < mTotalWidth; i++) {
             mYPositions[i] = (float) (STRETCH_FACTOR_A * Math.sin(mCycleFactorW * i) + OFFSET_Y);
+            if (mMaxPosition < mYPositions[i]) {
+                mMaxPosition = mYPositions[i];
+            }
         }
     }
 
