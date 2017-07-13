@@ -155,20 +155,62 @@ public class WaveView extends View {
         path2.moveTo(0, getHeight());
 
         resetPositonY();
-        for (int i = 0; i < getWidth(); i++) {
 
-            float circleY = (float) getYOnCircle(i);
-            float waveY = mResetOneYPositions[i] + mPercent;
+        if (mPercent<mRadius){
+            for (int i = 0; i < getWidth(); i++){
+                float waveY = mResetOneYPositions[i] + mPercent;
+                float circleTopY = (float) getYOnCircle(i);
+                if (circleTopY > 0) {
+                    path1.lineTo(i, Math.max(circleTopY, waveY));
+                }
+            }
+            path1.close();
+            bitmapCanvas.drawPath(path1, mWavePaintTransparent);
+        }else {
+
+            Path pathBottom = new Path();
+            for (int i = 0; i < getWidth(); i++){
+                float circleY = (float) getYOnCircleBottom(i);
+                // 链接波浪线
+                float waveY = mResetOneYPositions[i] + mPercent;
+                if (i == 0)
+                    pathBottom.moveTo(i, waveY);
+                pathBottom.lineTo(i, Math.min(waveY,circleY) );
+            }
+            for (int i = getWidth(); i > 0; i--){
+                //先连接底部的圆弧
+                float circleY = (float) getYOnCircleBottom(i);
+                pathBottom.lineTo(i, circleY);
+            }
+            pathBottom.close();
+            bitmapCanvas.drawPath(pathBottom, mWavePaintTransparent);
+        }
+        /*for (int i = 0; i < getWidth(); i++) {
+
+            *//*float circleY = (float) getYOnCircleBottom(i);
+
             if (circleY > 0) {
                 Log.d("draw2: ", circleY + "," + waveY);
-                path1.lineTo(i, Math.max(circleY, waveY));
+                path1.lineTo(i, Math.min(circleY, waveY));
+            }*//*
+
+            float waveY = mResetOneYPositions[i] + mPercent;
+
+            if (waveY > mRadius){
+
+                float circleBottomY = (float) getYOnCircleBottom(i);
+                if (circleBottomY > 0) {
+                    path1.lineTo(i, Math.max(circleBottomY, waveY));
+                }
+            }else {
+                float circleTopY = (float) getYOnCircle(i);
+                if (circleTopY > 0) {
+                    path1.lineTo(i, Math.max(circleTopY, waveY));
+                }
             }
+
             path2.lineTo(i, mResetTwoYPositions[i]+mPercent);
-        }
-        //path1.lineTo(getWidth(), mMaxPosition+mPercent);
-        path1.close();
-       // mWavePaintTransparent.setXfermode(mPorterDuffXfermode);
-        bitmapCanvas.drawPath(path1, mWavePaintTransparent);
+        }*/
 
         path2.lineTo(getWidth(), getHeight());
         path2.close();
@@ -193,7 +235,7 @@ public class WaveView extends View {
         mWavePaintTransparent.setXfermode(null);
         mWavePaint2.setXfermode(null);
 
-        //mPercent--;
+        mPercent--;
         if (mPercent == 0) mPercent = getHeight();
         postInvalidate();
     }
@@ -297,7 +339,7 @@ public class WaveView extends View {
         }
 
 
-        mPercent = getHeight()*3/4;
+        mPercent = getHeight();
     }
 
     private double getYOnCircle(float x) {
@@ -306,6 +348,14 @@ public class WaveView extends View {
         double result = Math.sqrt(number);
         Log.d("getXOnCircle: ", Math.pow(mRadius, 2) + "," + Math.pow(x, 2) + "," + result);
         return mRadius - result ;
+    }
+
+    private double getYOnCircleBottom(float x) {
+        x = x - mRadius;
+        double number = Math.pow(mRadius, 2) - Math.pow(x, 2);
+        double result = Math.sqrt(number);
+        Log.d("getXOnCircle: ", Math.pow(mRadius, 2) + "," + Math.pow(x, 2) + "," + result);
+        return result  + mRadius;
     }
 
     private void resetPositonY() {
