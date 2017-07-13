@@ -30,6 +30,7 @@ public class WaveView extends View {
     private float mStrockWidth;
 
     private Paint mWavePaint;
+    private Paint mWavePaint2;
 
     // 波纹颜色
     private static final int WAVE_PAINT_COLOR = 0x880000aa;
@@ -79,6 +80,7 @@ public class WaveView extends View {
     private void init(){
         mRingPaint = new Paint();
         Shader shader = new LinearGradient(mRadius,mRadius*2,mRadius,0,Color.parseColor("#FF8362"), Color.parseColor("#FF4258"), Shader.TileMode.CLAMP);
+        Shader shader2 = new LinearGradient(mRadius,mRadius*2,mRadius,0,Color.parseColor("#88FF8362"), Color.parseColor("#88FF4258"), Shader.TileMode.CLAMP);
         //mRingPaint.setShader(shader);
         mRingPaint.setColor(Color.BLUE);
         mRingPaint.setAntiAlias(true);
@@ -90,7 +92,12 @@ public class WaveView extends View {
         mWavePaint = new Paint();
         mWavePaint.setAntiAlias(true);
         mWavePaint.setStyle(Paint.Style.FILL);
-        mWavePaint.setShader(shader);
+        mWavePaint.setShader(shader2);
+
+        mWavePaint2 = new Paint();
+        mWavePaint2.setAntiAlias(true);
+        mWavePaint2.setStyle(Paint.Style.FILL);
+        mWavePaint2.setShader(shader);
 
         mXOffsetSpeedOne = TRANSLATE_X_SPEED_ONE;
         mXOffsetSpeedTwo = TRANSLATE_X_SPEED_TWO;
@@ -130,15 +137,26 @@ public class WaveView extends View {
 
         //bitmapCanvas.drawRect(0, mRadius/2, mTotalWidth, mTotalHeight, mWavePaint);
 
-        Path path = new Path();
-        path.moveTo(0, getHeight());
+        Path path1 = new Path();
+        path1.moveTo(0, getHeight());
+
+        Path path2 = new Path();
+        path2.moveTo(0, getHeight());
+
         resetPositonY();
         for (int i = 0; i < getWidth(); i++) {
-            path.lineTo(i, mResetOneYPositions[i]+mRadius);
+            path1.lineTo(i, mResetOneYPositions[i]+mRadius);
+            path2.lineTo(i, mResetTwoYPositions[i]+mRadius);
         }
-        path.lineTo(getWidth(), getHeight());
-        path.close();
-        bitmapCanvas.drawPath(path, mWavePaint);
+        path1.lineTo(getWidth(), getHeight());
+        path1.close();
+        mWavePaint.setXfermode(mPorterDuffXfermode);
+        bitmapCanvas.drawPath(path1, mWavePaint);
+
+        path2.lineTo(getWidth(), getHeight());
+        path2.close();
+        mWavePaint2.setXfermode(mPorterDuffXfermode);
+        bitmapCanvas.drawPath(path2, mWavePaint2);
 
         // 改变两条波纹的移动点
         mXOneOffset += mXOffsetSpeedOne;
@@ -155,6 +173,9 @@ public class WaveView extends View {
         bitmapCanvas.restore();
 
         canvas.drawBitmap(bitmap, 0, 0, null);
+        mWavePaint.setXfermode(null);
+        mWavePaint2.setXfermode(null);
+        postInvalidate();
     }
 
     private void draw1(Canvas canvas) {
