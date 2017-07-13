@@ -149,7 +149,7 @@ public class WaveView extends View {
         //bitmapCanvas.drawRect(0, mRadius/2, mTotalWidth, mTotalHeight, mWavePaintTransparent);
 
         Path path1 = new Path();
-        path1.moveTo(mRadius, mRadius);
+        path1.moveTo(mRadius, getHeight());
 
         Path path2 = new Path();
         path2.moveTo(0, getHeight());
@@ -195,7 +195,7 @@ public class WaveView extends View {
 
         //mPercent--;
         if (mPercent == 0) mPercent = getHeight();
-        //postInvalidate();
+        postInvalidate();
     }
 
     private void drawBitmapInCenter(Canvas canvas,Bitmap bitmap){
@@ -297,15 +297,15 @@ public class WaveView extends View {
         }
 
 
-        mPercent = 3;
+        mPercent = getHeight()*3/4;
     }
 
     private double getYOnCircle(float x) {
         x = x - mRadius;
-            double number = Math.pow(mRadius, 2) - Math.pow(x, 2);
-            double result = Math.sqrt(number);
-            Log.d("getXOnCircle: ", Math.pow(mRadius, 2) + "," + Math.pow(x, 2) + "," + result);
-            return result+mRadius;
+        double number = Math.pow(mRadius, 2) - Math.pow(x, 2);
+        double result = Math.sqrt(number);
+        Log.d("getXOnCircle: ", Math.pow(mRadius, 2) + "," + Math.pow(x, 2) + "," + result);
+        return mRadius - result ;
     }
 
     private void resetPositonY() {
