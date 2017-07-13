@@ -126,6 +126,8 @@ public class WaveView extends View {
         draw2(canvas);
     }
 
+    private float mPercent;
+
     private void draw2(Canvas canvas){
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
@@ -147,17 +149,23 @@ public class WaveView extends View {
         //bitmapCanvas.drawRect(0, mRadius/2, mTotalWidth, mTotalHeight, mWavePaintTransparent);
 
         Path path1 = new Path();
-        path1.moveTo(0, mMaxPosition+mRadius);
+        path1.moveTo(mRadius, mRadius);
 
         Path path2 = new Path();
         path2.moveTo(0, getHeight());
 
         resetPositonY();
         for (int i = 0; i < getWidth(); i++) {
-            path1.lineTo(i, mResetOneYPositions[i]+mRadius);
-            path2.lineTo(i, mResetTwoYPositions[i]+mRadius);
+
+            float circleY = (float) getYOnCircle(i);
+            float waveY = mResetOneYPositions[i] + mPercent;
+            if (circleY > 0) {
+                Log.d("draw2: ", circleY + "," + waveY);
+                path1.lineTo(i, Math.max(circleY, waveY));
+            }
+            path2.lineTo(i, mResetTwoYPositions[i]+mPercent);
         }
-        path1.lineTo(getWidth(), mMaxPosition+mRadius);
+        //path1.lineTo(getWidth(), mMaxPosition+mPercent);
         path1.close();
        // mWavePaintTransparent.setXfermode(mPorterDuffXfermode);
         bitmapCanvas.drawPath(path1, mWavePaintTransparent);
@@ -165,7 +173,7 @@ public class WaveView extends View {
         path2.lineTo(getWidth(), getHeight());
         path2.close();
         mWavePaint2.setXfermode(mPorterDuffXfermode);
-        bitmapCanvas.drawPath(path2, mWavePaint2);
+        //bitmapCanvas.drawPath(path2, mWavePaint2);
 
         // 改变两条波纹的移动点
         mXOneOffset += mXOffsetSpeedOne;
@@ -184,7 +192,10 @@ public class WaveView extends View {
         canvas.drawBitmap(bitmap, 0, 0, null);
         mWavePaintTransparent.setXfermode(null);
         mWavePaint2.setXfermode(null);
-        postInvalidate();
+
+        //mPercent--;
+        if (mPercent == 0) mPercent = getHeight();
+        //postInvalidate();
     }
 
     private void drawBitmapInCenter(Canvas canvas,Bitmap bitmap){
@@ -284,6 +295,17 @@ public class WaveView extends View {
                 mMaxPosition = mYPositions[i];
             }
         }
+
+
+        mPercent = 3;
+    }
+
+    private double getYOnCircle(float x) {
+        x = x - mRadius;
+            double number = Math.pow(mRadius, 2) - Math.pow(x, 2);
+            double result = Math.sqrt(number);
+            Log.d("getXOnCircle: ", Math.pow(mRadius, 2) + "," + Math.pow(x, 2) + "," + result);
+            return result+mRadius;
     }
 
     private void resetPositonY() {
