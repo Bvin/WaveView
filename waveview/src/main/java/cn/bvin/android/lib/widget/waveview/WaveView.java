@@ -177,7 +177,6 @@ public class WaveView extends View {
                     pathBottom.moveTo(i, Math.min(waveY, circleY));
                 }
                 pathBottom.lineTo(i, Math.min(waveY, circleY));
-                path2.lineTo(i, mResetTwoYPositions[i]+mPercent);
             }
             for (int i = getWidth(); i > 0; i--){
                 //连接底部的圆弧
@@ -187,32 +186,11 @@ public class WaveView extends View {
             pathBottom.close();
             bitmapCanvas.drawPath(pathBottom, mWavePaintTransparent);
         }
-        /*for (int i = 0; i < getWidth(); i++) {
 
-            *//*float circleY = (float) getYOnCircleBottom(i);
-
-            if (circleY > 0) {
-                Log.d("draw2: ", circleY + "," + waveY);
-                path1.lineTo(i, Math.min(circleY, waveY));
-            }*//*
-
-            float waveY = mResetOneYPositions[i] + mPercent;
-
-            if (waveY > mRadius){
-
-                float circleBottomY = (float) getYOnCircleBottom(i);
-                if (circleBottomY > 0) {
-                    path1.lineTo(i, Math.max(circleBottomY, waveY));
-                }
-            }else {
-                float circleTopY = (float) getYOnCircle(i);
-                if (circleTopY > 0) {
-                    path1.lineTo(i, Math.max(circleTopY, waveY));
-                }
-            }
-
+        //绘制第二层波浪
+        for (int i = 0; i < getWidth(); i++) {
             path2.lineTo(i, mResetTwoYPositions[i]+mPercent);
-        }*/
+        }
 
         path2.lineTo(getWidth(), getHeight());
         path2.close();
