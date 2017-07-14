@@ -81,11 +81,9 @@ public class WaveView extends View {
     private void init(){
         mRingPaint = new Paint();
         Shader shader = new LinearGradient(mRadius,mRadius*2,mRadius,0,Color.parseColor("#FF8362"), Color.parseColor("#FF4258"), Shader.TileMode.CLAMP);
-        Shader shader2 = new LinearGradient(mRadius,mRadius*2,mRadius,0,Color.parseColor("#88FF8362"), Color.parseColor("#88FF4258"), Shader.TileMode.CLAMP);
-        //mRingPaint.setShader(shader);
-        mRingPaint.setColor(Color.parseColor("#55ffffff"));
+        mRingPaint.setShader(shader);
         mRingPaint.setAntiAlias(true);
-        mRingPaint.setStyle(Paint.Style.FILL);
+        mRingPaint.setStyle(Paint.Style.STROKE);
         mStrockWidth = 3;
         mRingPaint.setStrokeWidth(mStrockWidth);
 
@@ -214,6 +212,9 @@ public class WaveView extends View {
         canvas.drawBitmap(bitmap, 0, 0, null);
         mWavePaintTransparent.setXfermode(null);
         mWavePaint2.setXfermode(null);
+
+        // 绘制外环
+        canvas.drawCircle(mRadius, mRadius, mRadius - mStrockWidth / 2, mRingPaint);
 
         mPercent--;
         if (mPercent == 0) mPercent = getHeight();
