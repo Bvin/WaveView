@@ -15,6 +15,8 @@ import android.graphics.Rect;
 import android.graphics.Shader;
 import android.os.Build;
 import android.support.annotation.Nullable;
+import android.text.Spannable;
+import android.text.SpannableStringBuilder;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
@@ -111,16 +113,12 @@ public class WaveView extends View {
         int width = (int) (mRadius * 2);
         width = resolveSize(width, widthMeasureSpec);
         int height = width;
-        Log.d("onMeasure-pre: ",width+","+width);
         setMeasuredDimension(width, height);
-        Log.d("onMeasure: ",getMeasuredWidth()+","+getMeasuredHeight());
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-
-        //draw1(canvas);
         draw2(canvas);
     }
 
@@ -137,14 +135,9 @@ public class WaveView extends View {
             bitmapCanvas = new Canvas(bitmap);
         }
         bitmapCanvas.save();
-        //绘制圆
-        //bitmapCanvas.drawCircle(mRadius, mRadius, mRadius, mRingPaint);
 
-        drawBitmapInCenter(bitmapCanvas,getCircleInRect());
-
-        //bitmapCanvas.drawLine(mRadius/2, 0, mRadius/2, mTotalHeight, mWavePaintTransparent);
-
-        //bitmapCanvas.drawRect(0, mRadius/2, mTotalWidth, mTotalHeight, mWavePaintTransparent);
+        //绘制圆形背景
+        drawBitmapInCenter(bitmapCanvas, getCircleInRect());
 
         Path path1 = new Path();
         path1.moveTo(mRadius, getHeight());
@@ -154,8 +147,9 @@ public class WaveView extends View {
 
         resetPositonY();
 
-        if (mPercent<mRadius){
-            for (int i = 0; i < getWidth(); i++){
+        if (mPercent < mRadius) {
+            // 上半部分
+            for (int i = 0; i < getWidth(); i++) {
                 float waveY = mResetOneYPositions[i] + mPercent;
                 float circleTopY = (float) getYOnCircle(i);
                 if (circleTopY > 0) {
@@ -164,8 +158,8 @@ public class WaveView extends View {
             }
             path1.close();
             bitmapCanvas.drawPath(path1, mWavePaintTransparent);
-        }else {
-
+        } else {
+            // 下半部分
             Path pathBottom = new Path();
             for (int i = 0; i < getWidth(); i++){
                 float circleY = (float) getYOnCircleBottom(i);
