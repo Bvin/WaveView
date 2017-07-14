@@ -129,7 +129,7 @@ public class WaveView extends View {
     private float mPercent;
 
     private void draw2(Canvas canvas){
-
+        Log.d("draw2: ","start");
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
             setLayerType(LAYER_TYPE_HARDWARE, null);
         }
@@ -168,14 +168,19 @@ public class WaveView extends View {
             bitmapCanvas.drawPath(path1, mWavePaintTransparent);
         }else {
 
+            boolean start = false;
             Path pathBottom = new Path();
             for (int i = 0; i < getWidth(); i++){
                 float circleY = (float) getYOnCircleBottom(i);
                 // 链接波浪线
                 float waveY = mResetOneYPositions[i] + mPercent;
-                if (i == 0)
-                    pathBottom.moveTo(i, waveY);
-                pathBottom.lineTo(i, Math.min(waveY,circleY) );
+                Log.d("draw2: "+i,circleY+","+waveY);
+                if (i == 0) {//todo 找出circle和wave相交点的坐标
+                    pathBottom.moveTo(i, Math.min(waveY, circleY));
+                    start = true;
+                }
+                if (start)
+                pathBottom.lineTo(i, Math.min(waveY, circleY));
             }
             for (int i = getWidth(); i > 0; i--){
                 //先连接底部的圆弧
@@ -238,6 +243,7 @@ public class WaveView extends View {
         mPercent--;
         if (mPercent == 0) mPercent = getHeight();
         postInvalidate();
+        Log.d("draw2: ","end");
     }
 
     private void drawBitmapInCenter(Canvas canvas,Bitmap bitmap){
@@ -346,7 +352,6 @@ public class WaveView extends View {
         x = x - mRadius;
         double number = Math.pow(mRadius, 2) - Math.pow(x, 2);
         double result = Math.sqrt(number);
-        Log.d("getXOnCircle: ", Math.pow(mRadius, 2) + "," + Math.pow(x, 2) + "," + result);
         return mRadius - result ;
     }
 
@@ -354,7 +359,6 @@ public class WaveView extends View {
         x = x - mRadius;
         double number = Math.pow(mRadius, 2) - Math.pow(x, 2);
         double result = Math.sqrt(number);
-        Log.d("getXOnCircle: ", Math.pow(mRadius, 2) + "," + Math.pow(x, 2) + "," + result);
         return result  + mRadius;
     }
 
