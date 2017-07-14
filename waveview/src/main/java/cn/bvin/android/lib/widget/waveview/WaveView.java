@@ -62,6 +62,8 @@ public class WaveView extends View {
     private Canvas bitmapCanvas;
     private float mMaxPosition;
 
+    private float mPercent;
+
     public WaveView(Context context) {
         super(context);
         init();
@@ -78,6 +80,7 @@ public class WaveView extends View {
         mRadius = a.getDimension(R.styleable.WaveView_radius, 0);
         Log.d("attrs: ", mRadius + "");
         a.recycle();
+        mPercent = mRadius * 2;
     }
 
     private void init(){
@@ -119,12 +122,6 @@ public class WaveView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        draw2(canvas);
-    }
-
-    private float mPercent;
-
-    private void draw2(Canvas canvas){
         Log.d("draw2: ","start");
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
             setLayerType(LAYER_TYPE_HARDWARE, null);
@@ -146,6 +143,8 @@ public class WaveView extends View {
         path2.moveTo(0, getHeight());
 
         resetPositonY();
+
+        Log.d("onDraw: ","percent is "+mPercent);
 
         if (mPercent < mRadius) {
             // 上半部分
@@ -210,13 +209,20 @@ public class WaveView extends View {
         // 绘制外环
         canvas.drawCircle(mRadius, mRadius, mRadius - mStrockWidth / 2, mRingPaint);
 
-        mPercent--;
-        if (mPercent == 0) mPercent = getHeight();
-        postInvalidate();
+        //mPercent--;
+        if (mPercent > 0)
+            postInvalidate();
         Log.d("draw2: ","end");
     }
 
-    private void drawBitmapInCenter(Canvas canvas,Bitmap bitmap){
+    public void setPercent(float percent) {
+        float height = mRadius*2;
+        float actrue = height * percent;
+        mPercent = height - actrue;
+        Log.d( "setPercent: ",percent+","+mPercent+","+actrue);
+    }
+
+    private void drawBitmapInCenter(Canvas canvas, Bitmap bitmap){
         Bitmap emptyBitmap =Bitmap.createBitmap(getWidth(),getHeight(), Bitmap.Config.ARGB_8888);
         Canvas canvasOfBitmap = new Canvas(emptyBitmap);
         Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -314,8 +320,6 @@ public class WaveView extends View {
             }
         }
 
-
-        mPercent = getHeight();
     }
 
     private double getYOnCircle(float x) {
