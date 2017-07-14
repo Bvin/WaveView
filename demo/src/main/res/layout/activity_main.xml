@@ -8,15 +8,10 @@
     tools:context="cn.bvin.android.lib.widget.waveview.demo.MainActivity">
 
     <cn.bvin.android.lib.widget.waveview.WaveView
+        android:id="@+id/wv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         app:radius="60dp"/>
-
-   <!-- <cn.bvin.android.lib.widget.waveview.TestDuffXfer
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:layout_gravity="center"/>-->
-
 
 </FrameLayout>
