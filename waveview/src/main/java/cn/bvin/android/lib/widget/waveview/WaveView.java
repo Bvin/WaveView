@@ -168,22 +168,19 @@ public class WaveView extends View {
             bitmapCanvas.drawPath(path1, mWavePaintTransparent);
         }else {
 
-            boolean start = false;
             Path pathBottom = new Path();
             for (int i = 0; i < getWidth(); i++){
                 float circleY = (float) getYOnCircleBottom(i);
-                // 链接波浪线
+                // 连接波浪线
                 float waveY = mResetOneYPositions[i] + mPercent;
-                Log.d("draw2: "+i,circleY+","+waveY);
-                if (i == 0) {//todo 找出circle和wave相交点的坐标
+                if (i == 0) {
                     pathBottom.moveTo(i, Math.min(waveY, circleY));
-                    start = true;
                 }
-                if (start)
                 pathBottom.lineTo(i, Math.min(waveY, circleY));
+                path2.lineTo(i, mResetTwoYPositions[i]+mPercent);
             }
             for (int i = getWidth(); i > 0; i--){
-                //先连接底部的圆弧
+                //连接底部的圆弧
                 float circleY = (float) getYOnCircleBottom(i);
                 pathBottom.lineTo(i, circleY);
             }
@@ -220,7 +217,7 @@ public class WaveView extends View {
         path2.lineTo(getWidth(), getHeight());
         path2.close();
         mWavePaint2.setXfermode(mPorterDuffXfermode);
-        //bitmapCanvas.drawPath(path2, mWavePaint2);
+        bitmapCanvas.drawPath(path2, mWavePaint2);
 
         // 改变两条波纹的移动点
         mXOneOffset += mXOffsetSpeedOne;
