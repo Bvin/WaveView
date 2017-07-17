@@ -64,6 +64,8 @@ public class WaveView extends View {
 
     private float mPercent;
 
+    private Bitmap mBackground;
+
     public WaveView(Context context) {
         super(context);
         init();
@@ -215,6 +217,10 @@ public class WaveView extends View {
         Log.d("draw2: ","end");
     }
 
+    public void setBackground(Bitmap background) {
+        mBackground = background;
+    }
+
     public void setPercent(float percent) {
         float height = mRadius*2;
         float actrue = height * percent;
@@ -223,13 +229,15 @@ public class WaveView extends View {
     }
 
     private void drawBitmapInCenter(Canvas canvas, Bitmap bitmap){
+        if (bitmap == null) return;
         Bitmap emptyBitmap =Bitmap.createBitmap(getWidth(),getHeight(), Bitmap.Config.ARGB_8888);
         Canvas canvasOfBitmap = new Canvas(emptyBitmap);
         Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
         paint.setColor(Color.BLUE);
         paint.setStyle(Paint.Style.FILL);
         canvasOfBitmap.drawCircle(mRadius, mRadius, mRadius, paint);
-        Rect rectSrc = new Rect(bitmap.getWidth()*1/4, bitmap.getHeight()*1/4, bitmap.getWidth()*3/4, bitmap.getHeight()*3/4);
+        int r = (int) mRadius;
+        Rect rectSrc = new Rect(bitmap.getWidth() / 2 - r, bitmap.getHeight() / 2 - r, bitmap.getWidth() / 2 + r, bitmap.getHeight() / 2 + r);
         Rect rect = new Rect(0, 0, getWidth(), getHeight());
         paint.setXfermode(mPorterDuffXfermode);
         canvasOfBitmap.drawBitmap(bitmap, rectSrc, rect, paint);
