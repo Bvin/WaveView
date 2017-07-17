@@ -2,7 +2,11 @@ package cn.bvin.android.lib.widget.waveview.demo;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.SpannableStringBuilder;
+import android.text.Spanned;
+import android.text.style.RelativeSizeSpan;
 import android.util.Log;
+import android.widget.TextView;
 
 import cn.bvin.android.lib.widget.waveview.WaveView;
 
@@ -13,6 +17,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         final WaveView waveView = (WaveView) findViewById(R.id.wv);
+        final TextView tv = (TextView) findViewById(R.id.tv);
 
         new Thread(){
             @Override
@@ -26,10 +31,14 @@ public class MainActivity extends AppCompatActivity {
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
+                    final int finalI = i;
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
                             waveView.setPercent(person);
+                            SpannableStringBuilder ssb = new SpannableStringBuilder(finalI +"%");
+                            ssb.setSpan(new RelativeSizeSpan(0.5f),ssb.length()-1,ssb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                            tv.setText(ssb);
                         }
                     });
                 }
