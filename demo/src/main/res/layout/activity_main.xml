@@ -7,6 +7,12 @@
     android:layout_height="match_parent"
     tools:context="cn.bvin.android.lib.widget.waveview.demo.MainActivity">
 
+    <ImageView
+        android:id="@+id/pp"
+        android:src="@drawable/pp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
     <cn.bvin.android.lib.widget.waveview.WaveView
         android:id="@+id/wv"
         android:layout_width="wrap_content"

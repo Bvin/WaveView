@@ -1,11 +1,15 @@
 package cn.bvin.android.lib.widget.waveview.demo;
 
+import android.graphics.Bitmap;
+import android.graphics.Rect;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.style.RelativeSizeSpan;
 import android.util.Log;
+import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import cn.bvin.android.lib.widget.waveview.WaveView;
@@ -16,7 +20,18 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        ImageView iv = (ImageView) findViewById(R.id.pp);
+        iv.setImageResource(R.drawable.pp);
         final WaveView waveView = (WaveView) findViewById(R.id.wv);
+        Rect rect = new Rect();
+        iv.getDrawingRect(rect);
+        Log.d("onCreate: ",rect.toString());
+        Bitmap bitmap = iv.getDrawingCache();
+        if (bitmap != null) {
+            Log.d( "onCreate: ","getDrawingCache");
+            waveView.setBackground(bitmap);
+        }
+
         final TextView tv = (TextView) findViewById(R.id.tv);
 
         new Thread(){
@@ -27,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
                     final float person = i / 100f;
                     Log.d("onCreate: ",""+person);
                     try {
-                        Thread.sleep(200);
+                        Thread.sleep(300);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
