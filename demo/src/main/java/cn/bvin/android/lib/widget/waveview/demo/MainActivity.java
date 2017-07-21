@@ -30,6 +30,7 @@ public class MainActivity extends AppCompatActivity {
         if (bitmap != null) {
             Log.d( "onCreate: ","getDrawingCache");
             waveView.setBackground(bitmap);
+            waveView.setWaveSpeed(5, 9);
         }
 
         final TextView tv = (TextView) findViewById(R.id.tv);
@@ -39,8 +40,8 @@ public class MainActivity extends AppCompatActivity {
             public void run() {
                 super.run();
                 for (int i = 1; i <= 100; i++) {
-                    final float person = i / 100f;
-                    Log.d("onCreate: ",""+person);
+                    final float percent = i / 100f;
+                    Log.d("onCreate: ",""+percent);
                     try {
                         Thread.sleep(300);
                     } catch (InterruptedException e) {
@@ -50,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            waveView.setPercent(person);
+                            waveView.setPercent(percent);
                             SpannableStringBuilder ssb = new SpannableStringBuilder(finalI +"%");
                             ssb.setSpan(new RelativeSizeSpan(0.5f),ssb.length()-1,ssb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                             tv.setText(ssb);

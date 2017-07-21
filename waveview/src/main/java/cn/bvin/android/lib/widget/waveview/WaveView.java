@@ -228,6 +228,11 @@ public class WaveView extends View {
         Log.d( "setPercent: ",percent+","+mPercent+","+actrue);
     }
 
+    public void setWaveSpeed(int wave1Speed, int wave2Speed){
+        mXOffsetSpeedOne = wave1Speed;
+        mXOffsetSpeedTwo = wave2Speed;
+    }
+
     private void drawBitmapInCenter(Canvas canvas, Bitmap bitmap){
         if (bitmap == null) return;
         Bitmap emptyBitmap =Bitmap.createBitmap(getWidth(),getHeight(), Bitmap.Config.ARGB_8888);
