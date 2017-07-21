@@ -5,7 +5,7 @@
     app:radius="60dp"
     
 2. 设置背景图，设置背景图才能透视到地图，也就是说把地图扣出来填充圆形达到透视效果。  
-    waveView.setBackground(bitmap);
+    waveView.setBackground(bitmap);  
     （因为大部分圆形图像大部分都是通过Paint设置一个PorterDuff.Mode.SRC_IN的PorterDuffXfermode
     来实现，底下绘制一个圆，上层用设置过Xfermode的绘笔draw一个bitmap上去达到圆形图像的目的。
     由于此效果有两条波纹，后面那条是一个透明度的渐变，而设置Xfermode去融合图层是不含透明度，
