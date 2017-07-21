@@ -18,4 +18,4 @@
     waveView.setPercent(percent);
     
 
-![demo](https://raw.githubusercontent.com/bvin/WaveView/demo/src/main/assets/demo.jpg)
+![demo](https://raw.githubusercontent.com/Bvin/WaveView/master/demo/src/main/assets/demo.jpg)
